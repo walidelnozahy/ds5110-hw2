@@ -10,7 +10,7 @@
 
 The revenue file breaks **rule 1** (every variable is a column): *quarter* is a variable, but its twelve values are column headers, and *revenue* is spread across those twelve columns. It also breaks **rule 2** (every observation is a row): one row holds twelve (company, quarter) observations. Rule 3 holds, since each cell has one number.
 
-`orders.csv` satisfies all three rules: `order_id` is unique, so each row is one order, and each column is one variable. `shipments.csv` also satisfies them, but for a different unit: `tracking` is unique, so each row is one *package*. The raw charts (`figures/step0_raw_data.png`) already show several `order_id`s with two or three shipment rows.
+`orders.csv` satisfies all three rules: `order_id` is unique, so each row is one order, and each column is one variable. `shipments.csv` also satisfies them, but for a different unit: `tracking` is unique, so each row is one *package*. The raw charts in `figures/` already show several `order_id`s with two or three shipment rows.
 
 ## Step 1: Revenue table
 
@@ -18,7 +18,7 @@ It is wide. I used `melt` to move the quarter headers into a `quarter` column, g
 
 ## Step 2: Duplicate keys
 
-`order_id` is unique in `orders` (20 rows, 20 ids) but **not** in `shipments` (35 rows, 20 ids: 9 orders have one shipment, 7 have two, 4 have three). So the join is **one-to-many**. Every order has at least one shipment and every shipment has an order, so I predicted 1 × 35 = 35 rows. The join returned 35, and `validate="one_to_many"` would have raised an error if the orders side ever stopped being unique.
+`order_id` is unique in `orders` (20 rows, 20 ids) but **not** in `shipments` (35 rows, 20 ids: 9 orders have one shipment, 7 have two, 4 have three). So the join is **one-to-many**. Every order has at least one shipment and every shipment has an order, so I predicted 1 × 35 = 35 rows. I checked uniqueness with `duplicated(subset=["order_id"])` before joining and printed the row count after: 35, as predicted.
 
 ## Step 3: Mean amount per customer
 
@@ -30,4 +30,4 @@ The final table has one row per **order** (20 rows), with columns `order_id`, `c
 
 ## Step 5: Visualization
 
-`figures/step5_before_after.png` puts the raw revenue heatmap next to a scatter of each order's amount against its company's revenue that quarter, with point size showing the number of shipments. Before tidying, that revenue figure was hidden in a column *name*, and the shipment count was spread over several rows of a different file. Now x, y, colour and size are each one column, so the chart is a single `scatterplot` call, and no order is counted twice.
+`figures/step5_before_after.png` puts the Step 0 revenue chart (drawn from the wide table) next to a scatter of each order's amount against its company's revenue that quarter, with point size showing the number of shipments. Before tidying, that revenue figure was hidden in a column *name*, and the shipment count was spread over several rows of a different file. Now x, y, colour and size are each one column, so one `groupby` loop draws it, a new company needs no code changes, and no order is counted twice.
